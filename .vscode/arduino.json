@@ -1,0 +1,6 @@
+{
+    "port": "/dev/cu.usbmodem1411",
+    "board": "arduino:avr:mega",
+    "sketch": "main.ino",
+    "configuration": "cpu=atmega2560"
+}
