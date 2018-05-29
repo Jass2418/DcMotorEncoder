@@ -11,13 +11,13 @@ DCEncoderPID::DCEncoderPID(int dirL,int dirR,int pwm,int aPin, int bPin){
     _resolution=0;
     _count=0;
     _angle=0;
+    _tolerance=0;
 }
 ///Public Methods
 
 void DCEncoderPID::initialize(){
-  attachInterrupt(digitalPinToInterrupt(_Apin),Achange,CHANGE);//interrupt pins for encoder
-  attachInterrupt(digitalPinToInterrupt(_Bpin),Bchange,CHANGE); 
-  
+//   attachInterrupt(digitalPinToInterrupt(_Apin),(void*)&DCEncoderPID::Achange,CHANGE);//interrupt pins for encoder
+//   attachInterrupt(digitalPinToInterrupt(_Bpin),(void*)&DCEncoderPID::Bchange,CHANGE); 
   pinMode(_pwm, OUTPUT);
   pinMode(_dir1, OUTPUT);
   pinMode(_dir2, OUTPUT);
@@ -38,6 +38,12 @@ void DCEncoderPID::setPosition(int setpoint){
     _setpoint=setpoint;
 }
 
+void DCEncoderPID::setPosition(int setpoint , double tolerance){
+    _setpoint=setpoint;
+    _tolerance=tolerance;
+
+}
+
 void DCEncoderPID::enable(){
     PIDCalculation();
     moveMotor();
@@ -45,8 +51,16 @@ void DCEncoderPID::enable(){
 
 void DCEncoderPID::printInfo(){
   Serial.print("Angle: "); Serial.println(_angle);
-  Serial.print("_count: "); Serial.print(_count);
+  Serial.print("count: "); Serial.print(_count);
 
+}
+
+int DCEncoderPID::getApin(){
+    return _Apin;
+}
+
+int DCEncoderPID::getBpin(){
+    return _Bpin;
 }
 
 ///Private Methods
@@ -139,13 +153,21 @@ void DCEncoderPID::Bchange(){
 }
 
 void DCEncoderPID::moveMotor(){
-    if (_angle < _setpoint) {
+  
+  if(_angle <=_setpoint+_tolerance && _angle>= _setpoint-_tolerance){
+    digitalWrite(_dir1, LOW);//No motion
+    digitalWrite(_dir2, LOW);
+  }
+
+  else if (_angle < _setpoint) {
     digitalWrite(_dir1, HIGH);// Forward motion
     digitalWrite(_dir2, LOW);
-  } else {
+  } 
+  else if(_angle > _setpoint) {
     digitalWrite(_dir1, LOW);//Reverse motion
     digitalWrite(_dir2, HIGH);
   }
 
   analogWrite(_pwm, _pidTerm_scaled);
 }
+

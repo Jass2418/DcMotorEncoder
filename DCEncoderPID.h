@@ -8,10 +8,17 @@ class DCEncoderPID
         DCEncoderPID(int dirL,int dirR,int pwm,int aPin, int bPin);
         void setResolution(double resolution);
         void setPID(double Kp,double Ki, double Kd);
-        void setPosition(int angle);
+        void setPosition(int setpoint);
+        void setPosition(int setpoint,double tolerance);
         void initialize();
         void enable();
         void printInfo();
+
+        int  getApin();
+        int  getBpin();
+
+        void Achange();
+        void Bchange();
         
     private:
         double _resolution;
@@ -27,6 +34,7 @@ class DCEncoderPID
         int _Bpin;
 
         double _setpoint;//I am setting it to move through 100 degrees
+        double _tolerance;
         double _Kp;// you can set these constants however you like depending on trial & error
         double _Ki;
         double _Kd;
@@ -39,9 +47,8 @@ class DCEncoderPID
         float _pidTerm_scaled = 0;// if the total gain we get is not in the PWM range we scale it down so that it's not bigger than |255|
 
         void PIDCalculation();
-        void Achange();
-        void Bchange();
         void moveMotor();
+        
 
 };
 
