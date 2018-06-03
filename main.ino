@@ -11,9 +11,13 @@ double Kp = 2;// you can set these constants however you like depending on trial
 double Ki = 2;
 double Kd = 2;
 
+SerialManager serialManager;
 
 
 DCEncoderPID R1(dir1,dir2,pwm,2,3);
+DCEncoderPID R2(dir1,dir2,pwm,2,3);
+DCEncoderPID R3(dir1,dir2,pwm,2,3);
+
 
 void intR1A(){ 
     R1.Achange(); 
@@ -22,20 +26,108 @@ void intR1B(){
     R1.Bchange(); 
 }
 
+void intR2A(){ 
+    R2.Achange(); 
+}
+void intR2B(){ 
+    R2.Bchange(); 
+}
+
+void intR3A(){ 
+    R3.Achange(); 
+}
+void intR3B(){ 
+    R3.Bchange(); 
+}
+
+
 void setup() {
     Serial.begin(9600);
+    InitR1();
+}
+
+void loop(){
+
+    R1.enable();
+    R2.enable();
+    R3.enable();
+    if(serialManager.isComplete)
+   {
+      serialManager.isComplete=false;
+      byte buffer[BufferSize];
+      serialManager.ReturnInfo(buffer);
+      MoveRobot(buffer);
+   }
+}
+
+void serialEvent() {
+  while(Serial.available())
+  {
+    byte rxByte=(byte) Serial.read();
+    serialManager.Process(rxByte);
+  }
+}
+void MoveRobot(byte buffer[BufferSize])
+{
+
+    int dirR1=buffer[0];
+    int stepR1= (buffer[1]<<8)+buffer[2];
+    MoveR1(dirR1,stepR1);
+
+    int dirR2=buffer[3];
+    int stepR2=(buffer[4]<<8)+buffer[5];
+    MoveR2(dirR2,stepR2);
+
+    int dirP1=buffer[6];
+    int stepP1=(buffer[7]<<8)+buffer[8];
+    MoveR3(dirP1,stepP1);
+
+}
+
+void MoveR1(int dir, int step)
+{
+    if(dir==1) step=-1*step;
+    else step=step;
+    R1.move(step);
+}
+
+void MoveR2(int dir, int step)
+{
+  if(dir==1) step=-1*step;
+  else step=step;
+  R2.move(step);
+}
+
+void MoveR3(int dir, int step)
+{
+  if(dir==1) step=-1*step;
+  else step=step;
+  R2.move(step);
+}
+
+void InitR1(){
     R1.setResolution(.04828);
     R1.setPID(Kp,Ki,Kd);
     R1.initialize();
     attachInterrupt(digitalPinToInterrupt(R1.getApin()),intR1A,CHANGE);
     attachInterrupt(digitalPinToInterrupt(R1.getBpin()),intR1B,CHANGE);
-    R1.setPosition(360,2);
+    R1.setPosition(0,2);
 }
 
-void loop(){
- R1.enable();
- R1.printInfo();
-
+void InitR2(){
+    R2.setResolution(.04828);
+    R2.setPID(Kp,Ki,Kd);
+    R2.initialize();
+    attachInterrupt(digitalPinToInterrupt(R1.getApin()),intR2A,CHANGE);
+    attachInterrupt(digitalPinToInterrupt(R1.getBpin()),intR2B,CHANGE);
+    R2.setPosition(0,2);
 }
 
-
+void InitR3(){
+    R3.setResolution(.04828);
+    R3.setPID(Kp,Ki,Kd);
+    R3.initialize();
+    attachInterrupt(digitalPinToInterrupt(R3.getApin()),intR3A,CHANGE);
+    attachInterrupt(digitalPinToInterrupt(R3.getBpin()),intR3B,CHANGE);
+    R3.setPosition(0,2);
+}

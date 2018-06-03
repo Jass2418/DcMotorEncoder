@@ -10,6 +10,7 @@ class DCEncoderPID
         void setPID(double Kp,double Ki, double Kd);
         void setPosition(int setpoint);
         void setPosition(int setpoint,double tolerance);
+        void move(int angles);
         void initialize();
         void enable();
         void printInfo();

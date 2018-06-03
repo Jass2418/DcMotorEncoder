@@ -44,6 +44,10 @@ void DCEncoderPID::setPosition(int setpoint , double tolerance){
 
 }
 
+void DCEncoderPID::move(int angles){
+  _setpoint+=angles;
+}
+
 void DCEncoderPID::enable(){
     PIDCalculation();
     moveMotor();
